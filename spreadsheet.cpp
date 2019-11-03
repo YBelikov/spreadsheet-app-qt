@@ -120,10 +120,10 @@ void SpreadSheet::copy(){
     QTableWidgetSelectionRange toCopyRange = getSelectedRanges();
     QString str;
     for(int i = 0; i < toCopyRange.rowCount(); ++i){
-        if(i > 0) str += '\n';
+        if(i > 0) str += "\n";
 
         for(int j = 0; j < toCopyRange.columnCount(); ++j){
-            if(j > 0)  str +='\t';
+            if(j > 0)  str += "\t";
             str += getFormula(toCopyRange.topRow() + i, toCopyRange.leftColumn() + j);
         }
     }
