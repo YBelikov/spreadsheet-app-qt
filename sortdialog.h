@@ -6,7 +6,7 @@
 
 class SortDialog : public QDialog, public Ui::Dialog
 {
-
+    Q_OBJECT
 public:
 
     SortDialog(QWidget *wgt = nullptr);
