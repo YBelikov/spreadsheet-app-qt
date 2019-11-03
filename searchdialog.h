@@ -27,7 +27,7 @@ public:
     SearchDialog(QWidget *wgt = nullptr);
 public slots:
     void enableSearchButton(const QString&);
-   // void close();
+
     void search();
 
 signals:
