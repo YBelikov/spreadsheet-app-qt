@@ -16,6 +16,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    cell.cpp \
+    comparator.cpp \
+    gotocelldialog.cpp \
     main.cpp \
     mainwindow.cpp \
     searchdialog.cpp \
@@ -23,13 +26,19 @@ SOURCES += \
     spreadsheet.cpp
 
 HEADERS += \
+    cell.h \
+    comparator.h \
+    gotocelldialog.h \
     mainwindow.h \
     searchdialog.h \
     sortdialog.h \
     spreadsheet.h
 
 FORMS += \
+    dialog.ui \
     mainwindow.ui
+
+RESOURCES = spreadsheet-app.qrc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

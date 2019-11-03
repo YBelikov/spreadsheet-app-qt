@@ -1,6 +1,9 @@
 #include "sortdialog.h"
 
-SortDialog::SortDialog()
+SortDialog::SortDialog(QWidget* wgt) : QDialog(wgt)
 {
+
+
+
 
 }
