@@ -8,6 +8,7 @@ class Comparator;
 
 class SpreadSheet : public QTableWidget
 {
+    Q_OBJECT
 private:
 
     enum {formatIdentifier = 0x7F51C883, rowCount = 999, columnCount = 26};

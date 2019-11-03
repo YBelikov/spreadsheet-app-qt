@@ -5,6 +5,7 @@
 #include <QDataStream>
 #include <QApplication>
 #include <QClipboard>
+#include <QDebug>
 #include "comparator.h"
 
 SpreadSheet::SpreadSheet(QWidget *wgt) : QTableWidget(wgt)
@@ -19,6 +20,7 @@ SpreadSheet::SpreadSheet(QWidget *wgt) : QTableWidget(wgt)
         setHorizontalHeaderItem(i, item);
     }
     setCurrentCell(0, 0);
+    setSelectionMode(QAbstractItemView::ContiguousSelection);
 
 }
 
@@ -75,7 +77,7 @@ void SpreadSheet::goToCell(const QString& cellPosition){
 QString SpreadSheet::getText(int row, int column) const{
     Cell *cell = getCell(row, column);
     if(cell){
-       return cell->getText();
+       return cell->text();
     }
     return "";
 }
@@ -119,22 +121,25 @@ void SpreadSheet::copy(){
 
     QTableWidgetSelectionRange toCopyRange = getSelectedRanges();
     QString str;
+    qDebug() << toCopyRange.rowCount();
     for(int i = 0; i < toCopyRange.rowCount(); ++i){
-        if(i > 0) str += '\n';
+        if(i > 0) str += "\n";
 
         for(int j = 0; j < toCopyRange.columnCount(); ++j){
-            if(j > 0)  str +='\t';
+            if(j > 0)  str += "\t";
             str += getFormula(toCopyRange.topRow() + i, toCopyRange.leftColumn() + j);
+            qDebug() << str;
         }
     }
+    qDebug() << str;
     QApplication::clipboard()->setText(str);
 }
 
 void SpreadSheet::deleteSelected(){
-    QTableWidgetSelectionRange toDeleteRange = getSelectedRanges();
-    //foreach(QTableWidgetItem* it, toDeleteRange){
-     //   delete it;
-    //}
+
+    foreach(QTableWidgetItem* it, selectedItems()){
+        delete it;
+    }
 }
 
 void SpreadSheet::paste(){
@@ -142,8 +147,8 @@ void SpreadSheet::paste(){
     QTableWidgetSelectionRange range = getSelectedRanges();
 
     QStringList rowsText = str.split('\n');
-    for(int i = 0; i < rowsText.size(); ++i){
-        for(int j = 0; j < rowsText[i].size(); ++j){
+    for(int i = 0; i < rowsText.count(); ++i){
+        for(int j = 0; j < rowsText[i].count('\t') + 1; ++j){
             QStringList cellsText  = rowsText[i].split('\t');
             setFormula(cellsText[j], range.topRow() + i, range.leftColumn() + j);
         }
@@ -151,7 +156,7 @@ void SpreadSheet::paste(){
 }
 
 QTableWidgetSelectionRange SpreadSheet::getSelectedRanges(){
-    QList<QTableWidgetSelectionRange> ranges;
+    QList<QTableWidgetSelectionRange> ranges = selectedRanges();
     if(ranges.isEmpty()){
         return QTableWidgetSelectionRange();
     }
@@ -167,30 +172,40 @@ void SpreadSheet::selectCurrentColumn(){
 }
 
 void SpreadSheet::searchNext(const QString& text, Qt::CaseSensitivity cs){
-    for(int i = currentRow(); i < rowCount; ++i){
-        for(int j = currentColumn(); j < columnCount; ++j){
+   int i = currentRow();
+   int j = currentColumn() + 1;
+   while(i < rowCount){
+        while(j < columnCount){
             if(getFormula(i, j).contains(text, cs)){
-                clearSelection();
-                setCurrentCell(i, j);
-                activateWindow();
-                return;
+               clearSelection();
+               setCurrentCell(i, j);
+               activateWindow();
+               return;
             }
+            ++j;
         }
-    }
+        j = 0;
+        ++i;
+   }
     QApplication::beep();
 }
 
 void SpreadSheet::searchPrevious(const QString& text, Qt::CaseSensitivity cs){
 
-    for(int i = currentRow() - 1; i >= 0; --i){
-        for(int j = currentColumn() - 1; j >= 0; --j){
-            if(getFormula(i, j).contains(text, cs)){
-                clearSelection();
-                setCurrentCell(i, j);
-                activateWindow();
-                return;
-            }
-        }
+    int i = currentRow();
+    int j = currentColumn() - 1;
+    while(i >= 0){
+        while(j >= 0){
+        if(getFormula(i, j).contains(text, cs)){
+            clearSelection();
+            setCurrentCell(i, j);
+            activateWindow();
+            return;
+          }
+        --j;
+       }
+        j = columnCount - 1;
+        --i;
     }
     QApplication::beep();
 }
@@ -218,10 +233,9 @@ void SpreadSheet::sort(const Comparator& comparator){
 }
 
 void SpreadSheet::recalculate(){
-
     for(int i = 0; i < rowCount; ++i){
         for(int j = 0; j < columnCount; ++j){
-           if(getCell(i, j)) getCell(i, j)->markForRecalculate();
+           if(getCell(i, j)) getCell(i, j)->setValueToBeRecalculated();
         }
     }
     viewport()->update();

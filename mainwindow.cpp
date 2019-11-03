@@ -43,7 +43,7 @@ void MainWindow::createActions(){
     saveFileAction->setShortcut(QKeySequence::Save);
     saveFileAction->setStatusTip(tr("Save spreadsheet file"));
     saveFileAction->setIcon(QIcon(":/images/save.png"));
-    connect(saveFileAction, SIGNAL(triggered()), this, SLOT(saveFile()));
+    connect(saveFileAction, SIGNAL(triggered()), this, SLOT(save()));
 
     saveFileAsAction = new QAction(tr("Save as"), this);
     saveFileAsAction->setShortcut(QKeySequence::SaveAs);
@@ -103,7 +103,7 @@ void MainWindow::createActions(){
     deleteAction->setShortcut(QKeySequence::Delete);
     deleteAction->setIcon(QIcon(":/image/delete.png"));
     deleteAction->setStatusTip(tr("Delete information selected cells in spreadsheet document"));
-    connect(deleteAction, SIGNAL(triggered()), document, SLOT(delete()));
+    connect(deleteAction, SIGNAL(triggered()), document, SLOT(deleteSelected()));
 
     searchAction = new QAction(tr("Search"), this);
     searchAction->setStatusTip(tr("Search for text in spreadsheet document"));
@@ -404,8 +404,8 @@ void MainWindow::readSettings(){
 void MainWindow::search(){
     if(!searchDialog){
         searchDialog = new SearchDialog(this);
-        connect(searchDialog, SIGNAL(searchNext(const QString&, Qt::CaseSesitivity)), document, SLOT(searchNext(const QString&, Qt::CaseSensitivity)));
-        connect(searchDialog, SIGNAL(searchPrevious(const QString&, Qt::CaseSesitivity)), document, SLOT(searchPrevious(const QString&, Qt::CaseSensitivity)));
+        connect(searchDialog, SIGNAL(searchNext(const QString&, Qt::CaseSensitivity)), document, SLOT(searchNext(const QString&, Qt::CaseSensitivity)));
+        connect(searchDialog, SIGNAL(searchPrevious(const QString&, Qt::CasenSesitivity)), document, SLOT(searchPrevious(const QString&, Qt::CaseSensitivity)));
     }
     if(searchDialog->isHidden()){
         searchDialog->show();
