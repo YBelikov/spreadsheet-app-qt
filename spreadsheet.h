@@ -12,7 +12,7 @@ class SpreadSheet : public QTableWidget
 private:
 
     enum {formatIdentifier = 0x7F51C883, rowCount = 999, columnCount = 26};
-    QTableWidgetSelectionRange getSelectedRanges();
+
 
     Cell *getCell(int, int) const;
     bool autoRecalc;
@@ -29,11 +29,12 @@ public slots:
     void searchPrevious(const QString&, Qt::CaseSensitivity);
     void recalculate();
     void autoRecalculate(bool);
-    void sort(const Comparator&);
+    void showGrid(bool);
 
 public:
 
     SpreadSheet(QWidget *wgt = nullptr);
+    QTableWidgetSelectionRange getSelectedRanges();
     QString getCurrentPosition() const;
     QString getCurrentFormula() const;
     QString getText(int, int) const;
@@ -41,6 +42,8 @@ public:
     void setFormula(const QString&, int, int);
     bool writeFile(const QString&);
     bool readFile(const QString&);
+    void sort(const Comparator&);
+
 };
 
 #endif // SPREADSHEET_H

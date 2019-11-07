@@ -35,6 +35,7 @@ private slots:
     void updateStatusBar();
     void documentModified();
     void about();
+    void sort();
 
 private:
     enum {maxRecentFiles = 5};

@@ -57,5 +57,4 @@ void GoToCellDialog::makeWarningBox(){
     }else{
         this->close();
     }
-
 }

@@ -21,7 +21,7 @@ SpreadSheet::SpreadSheet(QWidget *wgt) : QTableWidget(wgt)
     }
     setCurrentCell(0, 0);
     setSelectionMode(QAbstractItemView::ContiguousSelection);
-
+    insertColumn(columnCount);
 }
 
 bool SpreadSheet::readFile(const QString& fileName){
@@ -62,6 +62,7 @@ bool SpreadSheet::writeFile(const QString & fileName){
                 }
             }
         }
+        file.close();
         return true;
     }
 
@@ -71,7 +72,8 @@ bool SpreadSheet::writeFile(const QString & fileName){
 }
 
 void SpreadSheet::goToCell(const QString& cellPosition){
-
+    QString str = cellPosition.toUpper();
+    setCurrentCell(str.mid(1).toInt() - 1, str[0].unicode() - 'A');
 }
 
 QString SpreadSheet::getText(int row, int column) const{
@@ -145,7 +147,6 @@ void SpreadSheet::deleteSelected(){
 void SpreadSheet::paste(){
     QString str = QApplication::clipboard()->text();
     QTableWidgetSelectionRange range = getSelectedRanges();
-
     QStringList rowsText = str.split('\n');
     for(int i = 0; i < rowsText.count(); ++i){
         for(int j = 0; j < rowsText[i].count('\t') + 1; ++j){
@@ -153,7 +154,10 @@ void SpreadSheet::paste(){
             setFormula(cellsText[j], range.topRow() + i, range.leftColumn() + j);
         }
     }
+
+
 }
+
 
 QTableWidgetSelectionRange SpreadSheet::getSelectedRanges(){
     QList<QTableWidgetSelectionRange> ranges = selectedRanges();
@@ -221,15 +225,14 @@ void SpreadSheet::sort(const Comparator& comparator){
         }
         rows.append(row);
     }
-    qStableSort(rows.begin(), rows.end(), comparator);
+
+    std::sort(rows.begin(), rows.end(), comparator);
     for(int i = 0; i < range.rowCount(); ++i){
         for(int j = 0; j < range.columnCount(); ++j){
             setFormula(rows[i][j], range.topRow() + i, range.leftColumn() + j);
         }
     }
-
     clearSelection();
-
 }
 
 void SpreadSheet::recalculate(){
@@ -248,3 +251,6 @@ void SpreadSheet::autoRecalculate(bool autoRec){
     }
 }
 
+void SpreadSheet::showGrid(bool isShown){
+    setShowGrid(isShown);
+}

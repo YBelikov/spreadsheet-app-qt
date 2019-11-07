@@ -49,7 +49,7 @@ QVariant Cell::data(int role) const{
 QVariant Cell::value() const{
     QVariant Invalid;
     if (toBeRecalculated) {
-         toBeRecalculated = false;
+//         toBeRecalculated = false;
         QString formulaStr = getFormula();
         if (formulaStr.startsWith('\'')) {
              cachedValue = formulaStr.mid(1);

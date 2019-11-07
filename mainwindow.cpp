@@ -8,6 +8,7 @@
 #include <QFileDialog>
 #include <QCloseEvent>
 #include <QSettings>
+#include <QTableWidgetSelectionRange>
 
 MainWindow::MainWindow(QWidget *wgt) : QMainWindow(wgt)
 {
@@ -79,7 +80,7 @@ void MainWindow::createActions(){
     showGridAction->setCheckable(true);
     showGridAction->setChecked(true);
     showGridAction->setStatusTip(tr("Show or hide grid of spreadsheet document"));
-    connect(showGridAction, SIGNAL(toggled(bool)), this, SLOT(showGrid(bool)));
+    connect(showGridAction, SIGNAL(toggled(bool)), document, SLOT(showGrid(bool)));
 
     copyAction = new QAction(tr("Copy"), this);
     copyAction->setShortcut(QKeySequence::Copy);
@@ -101,22 +102,23 @@ void MainWindow::createActions(){
 
     deleteAction = new QAction(tr("Delete"), this);
     deleteAction->setShortcut(QKeySequence::Delete);
-    deleteAction->setIcon(QIcon(":/image/delete.png"));
+    deleteAction->setIcon(QIcon(":/images/delete.png"));
     deleteAction->setStatusTip(tr("Delete information selected cells in spreadsheet document"));
     connect(deleteAction, SIGNAL(triggered()), document, SLOT(deleteSelected()));
 
     searchAction = new QAction(tr("Search"), this);
     searchAction->setStatusTip(tr("Search for text in spreadsheet document"));
     searchAction->setShortcut(QKeySequence::Find);
-    searchAction->setIcon(QIcon(":/image/search.png"));
+    searchAction->setIcon(QIcon(":/images/search.png"));
     connect(searchAction, SIGNAL(triggered()), this, SLOT(search()));
 
     sortAction = new QAction(tr("Sort"), this);
     sortAction->setStatusTip(tr("Sort selected cells in spreadsheet document"));
-   // connect(sortAction, SIGNAL(triggered()), document, SLOT(sort()));
+    connect(sortAction, SIGNAL(triggered()), this, SLOT(sort()));
 
     goToCellAction = new QAction(tr("Go to cell"), this);
     goToCellAction->setStatusTip(tr("Move to cell"));
+    goToCellAction->setIcon(QIcon(":/images/goToCell.png"));
     connect(goToCellAction, SIGNAL(triggered()), this, SLOT(goToCell()));
 
     recalculateAction = new QAction(tr("Recalculate"), this);
@@ -127,7 +129,7 @@ void MainWindow::createActions(){
     autoRecalculateAction->setStatusTip(tr("Auto recalculate expression in a cell"));
     autoRecalculateAction->setCheckable(true);
     autoRecalculateAction->setChecked(true);
-    connect(autoRecalculateAction, SIGNAL(toggled(bool)), document, SLOT(autoRecalculate()));
+    connect(autoRecalculateAction, SIGNAL(toggled(bool)), document, SLOT(autoRecalculate(bool)));
 
     aboutAction = new QAction(tr("About"), this);
     aboutAction->setShortcut(Qt::Key_F9);
@@ -210,7 +212,7 @@ void MainWindow::createStatusBar(){
 
     statusBar()->addWidget(positionLabel);
     statusBar()->addWidget(formulaLabel, 1);
-    connect(document, SIGNAL(positionIsChanged(int, int, int, int)), this, SLOT(updateStatusBar()));
+    connect(document, SIGNAL(currentCellChanged(int, int, int, int)), this, SLOT(updateStatusBar()));
     connect(document, SIGNAL(contentModifiied()), this, SLOT(documentModified()));
     updateStatusBar();
 }
@@ -253,7 +255,8 @@ void MainWindow::newFile(){
 
 void MainWindow::openFile(){
 
-    QString str = QFileDialog::getOpenFileName(this, tr("Open file"), ".", "Spreadsheet document (*.spst)");
+   QString str = QFileDialog::getOpenFileName(this, tr("Open file"), ".", "Spreadsheet document (*.sp);;Text document(*.txt);;All files(*)");
+
    if(!str.isEmpty()){
        loadFile(str);
    }
@@ -283,14 +286,16 @@ bool MainWindow::save(){
 
 bool MainWindow::saveFileAs(){
 
-    QString saveFileName = QFileDialog::getSaveFileName(this, "Spreadsheet", ".");
-    if(!saveFileName.isEmpty()){
+    QString saveFileName = QFileDialog::getSaveFileName(this, "Spreadsheet", ".", tr("Spreadsheet(*.sp);;Text document(*.txt)"));
+    if(saveFileName.isEmpty()){
         return false;
     }
     return saveFile(saveFileName);
 }
+#include <QDebug>
 
 bool MainWindow::saveFile(const QString& fileName){
+
     if(!document->writeFile(fileName)){
         statusBar()->showMessage("Cannot save a file");
         return false;
@@ -327,7 +332,6 @@ void MainWindow::updateRecentFileActions(){
             it.remove();
         }
     }
-
     for(int i = 0; i < maxRecentFiles; ++i){
         if(i < recentFiles.count()){
             QString file = tr("%1 %2").arg(i + 1).arg(recentFiles[i]);
@@ -414,6 +418,14 @@ void MainWindow::search(){
     }
 }
 
+void MainWindow::sort(){
+    SortDialog dialog(this);
+    QTableWidgetSelectionRange range = document->getSelectedRanges();
+    dialog.setColumnRange('A' + range.leftColumn(), 'A' + range.rightColumn());
+    if(dialog.exec()){
+        document->sort(dialog.getComparator());
+    }
+}
 
 void MainWindow::about(){
     QMessageBox::about(nullptr, "About Spreadsheet app", "Spreadsheet app v1.0\n Made in educative and having fun goal\n");

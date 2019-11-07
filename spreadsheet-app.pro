@@ -32,7 +32,8 @@ HEADERS += \
     mainwindow.h \
     searchdialog.h \
     sortdialog.h \
-    spreadsheet.h
+    spreadsheet.h \
+    dialog.h
 
 FORMS += \
     dialog.ui \
